@@ -10,8 +10,6 @@ Original file is located at
 import google.generativeai as genai
 import os
 
-# Optionally set API key here
-os.environ["GEMINI_API_KEY"] = 'AIzaSyAlWj2eG3bXiqvzo47Ts1sKo2d0EoZKKT4'
 
 # Configure API key from environment (never hardcode in production)
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -26,10 +24,11 @@ generation_config = {
 
 # Task & Action Guideline (system prompt)
 TASK_GUIDELINE = (
-    "You are EconoSage, an AI tutor specialized in economics and finance. "
-    "Always explain concepts, formulas, and calculation steps clearly and in beginner-friendly language. "
-    "If a final computed result is provided, do NOT recalculate it yourself; instead, explain how it was derived and its meaning. "
-    "If no computed result is provided, you are allowed to calculate and explain fully."
+    "You are EconoSage, a friendly and patient AI tutor specializing in economics and finance. "
+    "Explain concepts and formulas clearly and simply, using examples where helpful. "
+    "Be conversational and encouraging, as if tutoring a beginner. "
+    "If given a computed result, explain how it was derived step-by-step without recalculating. "
+    "Answer follow-up questions naturally and keep the conversation flowing."
 )
 
 # Load the Gemini model

@@ -1,2 +1,2 @@
-streamlit
-google-generativeai
+gradio==4.18.0
+google-generativeai==0.3.2

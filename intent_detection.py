@@ -11,14 +11,14 @@ import re
 
 # Map keywords to formula names
 INTENT_KEYWORDS = {
-    "compound_interest": ["compound interest", "compound", "interest"],
+    "compound_interest": ["compound interest", "compound"],
+    "simple_interest": ["simple interest", "simple"],
     "principal_from_compound": ["principal from compound", "principal", "initial amount"],
     "rate_from_compound": ["rate from compound", "interest rate", "rate of return"],
     "roi": ["return on investment", "roi"],
     "break_even": ["break even", "breakeven"],
     "npv": ["net present value", "npv"],
     "future_value_annuity": ["future value annuity", "annuity"],
-    "simple_interest": ["simple interest"],
     "payback_period": ["payback period"],
     "price_elasticity_of_demand": ["price elasticity of demand", "elasticity of demand"],
     "gdp_growth_rate": ["gdp growth rate", "economic growth rate"],
@@ -35,51 +35,51 @@ INTENT_KEYWORDS = {
     "markup_price": ["markup pricing", "markup price"],
 }
 
-# Regex patterns for extracting numbers and common parameters
+# Regex patterns for extracting parameters
 PARAM_PATTERNS = {
-    "P": r"principal(?: amount)?[:= ]*([\d\.]+)",
-    "r": r"rate(?: of interest| rate)?[:= ]*([\d\.]+)%",
-    "n": r"compounded (\d+) times",
-    "t": r"time(?: period| in years)?[:= ]*([\d\.]+)",
-    "A": r"amount[:= ]*([\d\.]+)",
-    "gain": r"gain[:= ]*([\d\.]+)",
-    "cost": r"cost[:= ]*([\d\.]+)",
-    "fixed_costs": r"fixed costs?[:= ]*([\d\.]+)",
-    "price_per_unit": r"price per unit[:= ]*([\d\.]+)",
-    "variable_cost_per_unit": r"variable cost per unit[:= ]*([\d\.]+)",
-    "discount_rate": r"discount rate[:= ]*([\d\.]+)%",
-    "cash_flows": r"cash flows?[:= ]*\[([\d\., ]+)\]",
-    "payment": r"payment[:= ]*([\d\.]+)",
-    "rate_per_period": r"rate per period[:= ]*([\d\.]+)%",
-    "periods": r"periods?[:= ]*([\d\.]+)",
-    "initial_investment": r"initial investment[:= ]*([\d\.]+)",
-    "annual_cash_inflow": r"annual cash inflow[:= ]*([\d\.]+)",
+    "P": r"(?:principal(?: amount)?|P)[:= ]*\s*([\d\.]+)",
+    "r": r"(?:rate(?: of interest| rate)?|r)[:= ]*\s*([\d\.]+)%?",
+    "t": r"(?:time(?: period| in years)?|t)[:= ]*\s*([\d\.]+)",
+    "n": r"(?:compounded (\d+) times|n)[:= ]*\s*([\d\.]+)",
+    "A": r"(?:amount|A)[:= ]*\s*([\d\.]+)",
+    "gain": r"gain[:= ]*\s*([\d\.]+)",
+    "cost": r"cost[:= ]*\s*([\d\.]+)",
+    "fixed_costs": r"fixed costs?[:= ]*\s*([\d\.]+)",
+    "price_per_unit": r"price per unit[:= ]*\s*([\d\.]+)",
+    "variable_cost_per_unit": r"variable cost per unit[:= ]*\s*([\d\.]+)",
+    "discount_rate": r"(?:discount rate|discount)[:= ]*\s*([\d\.]+)%?",
+    "cash_flows": r"cash flows?[:= ]*\s*\[([\d\., ]+)\]",
+    "payment": r"payment[:= ]*\s*([\d\.]+)",
+    "rate_per_period": r"(?:rate per period|rate per period)[:= ]*\s*([\d\.]+)%?",
+    "periods": r"periods?[:= ]*\s*([\d\.]+)",
+    "initial_investment": r"initial investment[:= ]*\s*([\d\.]+)",
+    "annual_cash_inflow": r"annual cash inflow[:= ]*\s*([\d\.]+)",
 
     # Newly added patterns:
-    "percent_change_quantity": r"percent(?:age)? change in quantity[:= ]*([\d\.]+)%",
-    "percent_change_price": r"percent(?:age)? change in price[:= ]*([\d\.]+)%",
-    "gdp_t": r"gdp(?: at time t)?[:= ]*([\d\.]+)",
-    "gdp_t_minus_1": r"gdp(?: at time t-1)?[:= ]*([\d\.]+)",
-    "total_debt": r"total debt[:= ]*([\d\.]+)",
-    "shareholders_equity": r"shareholders'? equity[:= ]*([\d\.]+)",
-    "operating_income": r"operating income[:= ]*([\d\.]+)",
-    "revenue": r"revenue[:= ]*([\d\.]+)",
-    "risk_free_rate": r"risk[- ]free rate[:= ]*([\d\.]+)%",
-    "beta": r"beta[:= ]*([\d\.]+)",
-    "market_return": r"market return[:= ]*([\d\.]+)%",
-    "percent_change_quantity_supplied": r"percent(?:age)? change in quantity supplied[:= ]*([\d\.]+)%",
-    "net_operating_income": r"net operating income[:= ]*([\d\.]+)",
-    "total_debt_service": r"total debt service[:= ]*([\d\.]+)",
-    "demand": r"demand[:= ]*([\d\.]+)",
-    "ordering_cost": r"ordering cost[:= ]*([\d\.]+)",
-    "holding_cost": r"holding cost[:= ]*([\d\.]+)",
-    "E": r"market value of equity[:= ]*([\d\.]+)",
-    "V": r"total market value[:= ]*([\d\.]+)",
-    "Re": r"cost of equity[:= ]*([\d\.]+)%",
-    "D": r"market value of debt[:= ]*([\d\.]+)",
-    "Rd": r"cost of debt[:= ]*([\d\.]+)%",
-    "Tc": r"corporate tax rate[:= ]*([\d\.]+)%",
-    "markup_percentage": r"markup(?: percentage)?[:= ]*([\d\.]+)%",
+    "percent_change_quantity": r"percent(?:age)? change in quantity[:= ]*\s*([\d\.]+)%?",
+    "percent_change_price": r"percent(?:age)? change in price[:= ]*\s*([\d\.]+)%?",
+    "gdp_t": r"gdp(?: at time t)?[:= ]*\s*([\d\.]+)",
+    "gdp_t_minus_1": r"gdp(?: at time t-1)?[:= ]*\s*([\d\.]+)",
+    "total_debt": r"total debt[:= ]*\s*([\d\.]+)",
+    "shareholders_equity": r"shareholders'? equity[:= ]*\s*([\d\.]+)",
+    "operating_income": r"operating income[:= ]*\s*([\d\.]+)",
+    "revenue": r"revenue[:= ]*\s*([\d\.]+)",
+    "risk_free_rate": r"(?:risk[- ]free rate|risk free)[:= ]*\s*([\d\.]+)%?",
+    "beta": r"beta[:= ]*\s*([\d\.]+)",
+    "market_return": r"market return[:= ]*\s*([\d\.]+)%?",
+    "percent_change_quantity_supplied": r"percent(?:age)? change in quantity supplied[:= ]*\s*([\d\.]+)%?",
+    "net_operating_income": r"net operating income[:= ]*\s*([\d\.]+)",
+    "total_debt_service": r"total debt service[:= ]*\s*([\d\.]+)",
+    "demand": r"demand[:= ]*\s*([\d\.]+)",
+    "ordering_cost": r"ordering cost[:= ]*\s*([\d\.]+)",
+    "holding_cost": r"holding cost[:= ]*\s*([\d\.]+)",
+    "E": r"(?:market value of equity|E)[:= ]*\s*([\d\.]+)",
+    "V": r"(?:total market value|V)[:= ]*\s*([\d\.]+)",
+    "Re": r"(?:cost of equity|Re)[:= ]*\s*([\d\.]+)%?",
+    "D": r"(?:market value of debt|D)[:= ]*\s*([\d\.]+)",
+    "Rd": r"(?:cost of debt|Rd)[:= ]*\s*([\d\.]+)%?",
+    "Tc": r"(?:corporate tax rate|Tc)[:= ]*\s*([\d\.]+)%?",
+    "markup_percentage": r"markup(?: percentage)?[:= ]*\s*([\d\.]+)%?",
 }
 
 def extract_numbers(text):
@@ -88,36 +88,49 @@ def extract_numbers(text):
 
 def extract_params(user_text):
     """
-    Try to extract parameters from user text based on PARAM_PATTERNS.
-    Returns dict with params as floats.
+    Extract parameters from user_text using regex patterns.
+    Returns a dict of parameters with float values.
     """
     params = {}
     for param, pattern in PARAM_PATTERNS.items():
         match = re.search(pattern, user_text, re.IGNORECASE)
         if match:
-            val = match.group(1)
-            try:
-                val = float(val)
-                # For rates given as percentages, convert to decimals
-                if 'rate' in param or 'r' == param or 'discount_rate' == param or 'rate_per_period' == param:
-                    if val > 1:
-                        val = val / 100
-                params[param] = val
-            except:
-                continue
-    # Special case: cash_flows as list
+            val = None
+            if match.group(1):
+                val = match.group(1)
+            elif match.lastindex and match.lastindex >= 2 and match.group(2):
+                val = match.group(2)
+            if val is not None:
+                try:
+                    val_float = float(val)
+                    # Convert % to decimal for rate-like params
+                    if param in [
+                        "r", "rate_per_period", "discount_rate", "risk_free_rate",
+                        "Re", "Rd", "Tc", "markup_percentage",
+                        "percent_change_quantity", "percent_change_price",
+                        "percent_change_quantity_supplied", "market_return"
+                    ]:
+                        if val_float > 1:
+                            val_float /= 100
+                    params[param] = val_float
+                except Exception as e:
+                    # optionally log the error here
+                    continue
+
+    # Special handling for cash_flows list extraction
     if "cash_flows" in params and isinstance(params["cash_flows"], str):
         try:
             cf_str = params["cash_flows"]
             cf_list = [float(x.strip()) for x in cf_str.split(",")]
             params["cash_flows"] = cf_list
-        except:
+        except Exception:
             pass
+
     return params
 
 def detect_intent(user_text):
     """
-    Detect formula intent based on keywords in user_text.
+    Detect the formula intent from user_text based on keyword matching.
     Returns formula_name or None.
     """
     text = user_text.lower()
@@ -127,9 +140,27 @@ def detect_intent(user_text):
                 return formula
     return None
 
+def detect_conversational_intent(user_text):
+    """
+    Detect conversational intent: gratitude, follow_up, or new_question.
+    Returns one of "gratitude", "follow_up", or "new_question".
+    """
+    text = user_text.lower()
+    gratitude_phrases = ["thank you", "thanks", "got it", "that's all", "no more", "stop", "bye", "goodbye"]
+    follow_up_starts = ["why", "how", "can you explain", "what if", "tell me more", "help me understand", "could you explain"]
+
+    if any(phrase in text for phrase in gratitude_phrases):
+        return "gratitude"
+    elif any(text.startswith(prefix) for prefix in follow_up_starts):
+        return "follow_up"
+    else:
+        return "new_question"
+
+
 def parse_user_query(user_text):
     """
-    Returns (formula_name, params_dict) if detected, else (None, {}).
+    Parse user_text to detect intent and extract parameters.
+    Returns (formula_name, params_dict) or (None, {}).
     """
     intent = detect_intent(user_text)
     if intent is None:
@@ -137,3 +168,4 @@ def parse_user_query(user_text):
 
     params = extract_params(user_text)
     return intent, params
+
