@@ -10,11 +10,8 @@ Original file is located at
 import google.generativeai as genai
 import os
 
-
-# Configure API key from environment (never hardcode in production)
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Model generation parameters for deterministic outputs
 generation_config = {
     "temperature": 0.0,
     "top_p": 1,
@@ -22,63 +19,110 @@ generation_config = {
     "max_output_tokens": 1024,
 }
 
-# Task & Action Guideline (system prompt)
 TASK_GUIDELINE = (
     "You are EconoSage, a friendly and patient AI tutor specializing in economics and finance. "
+    "Just greet the user and give response to only whatever prompt is given. No examples first, listen to the user prompt. "
+    "For normal conversation, be polite, short, and crisp. "
     "Explain concepts and formulas clearly and simply, using examples where helpful. "
     "Be conversational and encouraging, as if tutoring a beginner. "
     "If given a computed result, explain how it was derived step-by-step without recalculating. "
     "Answer follow-up questions naturally and keep the conversation flowing."
 )
 
-# Load the Gemini model
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",  # or "gemini-pro"
+    model_name="gemini-1.5-flash",
     generation_config=generation_config,
 )
+
+
+
+def is_theoretical_question(user_question: str) -> bool:
+    """
+    Uses Gemini to classify whether the question is theoretical (True)
+    or requires computation/formula-based calculation (False).
+    """
+    try:
+        classification_prompt = (
+            "Please answer ONLY with 'Yes' or 'No' (without quotes).\n"
+            "Is the following question purely theoretical or explanatory, "
+            "without requiring any math calculation or formula application?\n\n"
+            f"Question: \"{user_question}\""
+        )
+
+        classification_chat = model.start_chat(history=[])
+        response = classification_chat.send_message(classification_prompt)
+        answer = response.text.strip().lower()
+
+        # Check if answer clearly indicates yes or no
+        yes_keywords = {"yes", "yeah", "yep", "y"}
+        no_keywords = {"no", "nope", "n"}
+
+        # Check the first word for a yes/no keyword
+        first_word = answer_lower.split()[0] if answer_lower else ""
+
+        if first_word in yes_keywords:
+            return True
+        elif first_word in no_keywords:
+            return False
+        else:
+            # fallback
+            return False
+
+    except Exception as e:
+        print(f"⚠️ Error while checking if question is theoretical: {e}")
+        return False
+
 
 def ask_gemini_explainer(
     user_question: str,
     computed_result: str = None,
     formula_used: str = None,
+    region: str = None,
     history_session=None
 ) -> tuple[str, object]:
     """
-    Ask Gemini a question, optionally provide a computed result and formula,
-    and keep track of chat session using the Gemini SDK.
+    Ask Gemini a question with optional computed result and formula.
+    Supports region-aware prompts and maintains chat session.
 
-    Parameters:
-    - user_question: User input
-    - computed_result: Optional precomputed numeric result
-    - formula_used: Optional formula string
-    - history_session: An active genai.ChatSession object
+    Params:
+    - user_question: The user query text
+    - computed_result: Optional computed numeric result (string)
+    - formula_used: Optional formula explanation string
+    - region: Optional string indicating user's region (e.g. "India", "USA")
+    - history_session: Optional Gemini chat session object to maintain context
 
     Returns:
-    - Tuple of (Gemini response text, updated chat session)
+    - Tuple: (response_text, updated_history_session)
     """
     try:
         if history_session is None:
             history_session = model.start_chat(history=[])
-            # Inject the system-level TASK_GUIDELINE at the start
             history_session.send_message(TASK_GUIDELINE)
 
-        if computed_result:
+        # Region context injection
+        region_context = ""
+        if region:
+            region_context = f"\nPlease tailor your explanation according to economic/financial practices common in {region}."
+
+        if computed_result and formula_used:
             full_prompt = (
                 f"{user_question.strip()}\n\n"
                 f"Note: The final computed result is:\n**{computed_result}**.\n"
-                f"Please explain how this result was calculated"
+                f"Please explain how this result was calculated using the formula: {formula_used}."
+                + region_context
+                + " Provide a clear, beginner-friendly explanation."
             )
-            if formula_used:
-                full_prompt += f" using the formula: {formula_used}."
-            full_prompt += " Provide a clear, beginner-friendly explanation."
         else:
+            # No precomputed result/formula: Gemini calculates and explains fully
             full_prompt = (
                 f"{user_question.strip()}\n\n"
                 "No precomputed result was provided. Please calculate and explain the answer fully, showing the formula and steps."
+                + region_context
             )
 
         response = history_session.send_message(full_prompt)
         return response.text.strip(), history_session
 
     except Exception as e:
+        # You might want to handle specific exceptions differently
         return f"❌ Error from Gemini API: {str(e)}", history_session
